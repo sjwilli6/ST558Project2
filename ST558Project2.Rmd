@@ -32,6 +32,27 @@ Our end goal is to be able to predict the number of shares based on having data 
 
 # Reading in Data
 
-```{r read, include=TRUE}
+The read.csv() file name will change depending on who is importing the Online News Popularity data. We have dropped any unneccessary variables that will not be used to help us in our predictions.
 
+```{r read, include=TRUE}
+# Will need to change this depending on who is working!
+newsPop <- read.csv("/Users/monicabeingolea/Documents/ST558/OnlineNewsPopularity/OnlineNewsPopularity.csv")
+# Only selecting the columns of interest
+newsPop <- newsPop[ , c(3,5,10,11,13,14:19,49,50,61)]
+# Check for missing values
+sum(is.na(newsPop))
+```
+
+We want to subset the data to work based on the different data channel of interest. Creating a new variable called `data_channel` will allow this to work successfully. This way, we can turn our focus to a singular column as opposed to having six binary variables. We will use the `mutate` function in the *tidyverse* package. Replacing NA's in the `data_channel` variable and setting it as a factor is very important in order to help us predict the total shares.
+
+
+```{r dataChannel, include=TRUE}
+library(tidyverse)
+# Create new variable data_channel
+newsPop <- newsPop %>% mutate(data_channel = case_when(data_channel_is_bus == 1 ~ "Business", data_channel_is_entertainment == 1 ~ "Entertainment", data_channel_is_lifestyle == 1 ~ "Lifestyle", data_channel_is_socmed == 1 ~ "SocialMedia", data_channel_is_tech == 1 ~ "Tech", data_channel_is_world == 1 ~ "World"))
+# Replace any missing values
+newsPop$data_channel <- replace_na(newsPop$data_channel, "Other")
+# Make data_channel a factor variable
+newsPop$data_channel <- as.factor(newsPop$data_channel)
+head(newsPop)
 ```
