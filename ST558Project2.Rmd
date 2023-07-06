@@ -26,10 +26,12 @@ The (Online News Popularity)[https://archive.ics.uci.edu/dataset/332/online+news
 `rate_positive_words` - Rate of positive words among non-neutral
 `rate_negative_words` - Rate of negative words among non-neutral
 
-# Libraries Used
-** Leaving this blank for now. Will add as libraries are used **
+# Purpose and Methods
+
+Our end goal is to be able to predict the number of shares based on having data from the eight variables listed above. We are going to split the data set into two sets: training (70%) and test (30%). (Linear Regression Models)[https://en.wikipedia.org/wiki/Linear_regression] and (Ensemble Tree-Based Models)[https://towardsdatascience.com/decision-trees-understanding-the-basis-of-ensemble-methods-e075d5bfa704] will be utilized to help us predict the total number of shares. *Random Forest Models* and *Boosted Tree Models* will be chosen using cross-validation.
 
 # Reading in Data
+
 ```{r read, include=TRUE}
 
 ```
