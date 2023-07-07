@@ -75,7 +75,13 @@ newsPopTest <- newsPop[-sub, ]
 
 # Summarizations
 
-The first thing that we wanted to look at was the number of shares for each data channel. One way to look at this is using a number summary to compare the means.
+We wanted to see the summary statistics of each variable that we are using to predict the number of shares. The statistics will include the minimum, maximum, mean, median, and quartiles.
+
+```{r summary, include=TRUE}
+summary(newsPopTrain)
+```
+
+Another thing that we wanted to look at was the number of shares for each data channel. One way to look at this is using a number summary to compare the means.
 
 ```{r table1, include=TRUE}
 # Number summary
@@ -93,8 +99,14 @@ g + stat_summary(fun = "mean", geom = "bar", color = "blue", fill = "blue") +
   labs(x = "Data Channel", y = "Shares", title = "Shares per Data Channel")
 ```
 
-```{r contingency1, include=TRUE}
-# Create contingency table
-knitr::kable(table(newsPop$shares, newsPop$num_imgs), caption= "Number of Images per Shares")
+We are curious to see if the variables that we have selected have any correlation. In order to check this, a correlation plot has been created.
+
+```{r corr, include=TRUE}
+library(corrplot)
+newsPopTrain1 <- newsPopTrain[ , -c(9)]
+newsPopTrainCorr <- cor(newsPopTrain1)
+corrplot(newsPopTrainCorr, type="upper", method="number", tl.pos="lt", number.cex=0.5)
+corrplot(newsPopTrainCorr, type="lower", add=TRUE, tl.pos="n", number.cex=0.5)
 ```
 
+Based on the correlation plots, none of the variables seem to be highly correlated (near 1). This is good news in our case to predict the number of shares.
