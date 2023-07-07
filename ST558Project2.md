@@ -114,7 +114,40 @@ newsPopTest <- newsPop[-sub, ]
 
 # Summarizations
 
-The first thing that we wanted to look at was the number of shares for
+We wanted to see the summary statistics of each variable that we are
+using to predict the number of shares. The statistics will include the
+minimum, maximum, mean, median, and quartiles.
+
+``` r
+summary(newsPopTrain)
+```
+
+    ##  n_tokens_title n_unique_tokens     num_imgs         num_videos    
+    ##  Min.   : 2.0   Min.   :0.0000   Min.   :  0.000   Min.   : 0.000  
+    ##  1st Qu.: 9.0   1st Qu.:0.4708   1st Qu.:  1.000   1st Qu.: 0.000  
+    ##  Median :10.0   Median :0.5389   Median :  1.000   Median : 0.000  
+    ##  Mean   :10.4   Mean   :0.5302   Mean   :  4.557   Mean   : 1.244  
+    ##  3rd Qu.:12.0   3rd Qu.:0.6082   3rd Qu.:  4.000   3rd Qu.: 1.000  
+    ##  Max.   :23.0   Max.   :1.0000   Max.   :128.000   Max.   :75.000  
+    ##                                                                    
+    ##   num_keywords    rate_positive_words rate_negative_words     shares      
+    ##  Min.   : 1.000   Min.   :0.0000      Min.   :0.0000      Min.   :     4  
+    ##  1st Qu.: 6.000   1st Qu.:0.6000      1st Qu.:0.1848      1st Qu.:   947  
+    ##  Median : 7.000   Median :0.7143      Median :0.2778      Median :  1400  
+    ##  Mean   : 7.237   Mean   :0.6828      Mean   :0.2870      Mean   :  3425  
+    ##  3rd Qu.: 9.000   3rd Qu.:0.8000      3rd Qu.:0.3824      3rd Qu.:  2800  
+    ##  Max.   :10.000   Max.   :1.0000      Max.   :1.0000      Max.   :843300  
+    ##                                                                           
+    ##         data_channel 
+    ##  Business     :4381  
+    ##  Entertainment:4949  
+    ##  Lifestyle    :1433  
+    ##  Miscellaneous:4273  
+    ##  SocialMedia  :1634  
+    ##  Tech         :5231  
+    ##  World        :5849
+
+Another thing that we wanted to look at was the number of shares for
 each data channel. One way to look at this is using a number summary to
 compare the means.
 
@@ -156,7 +189,8 @@ channel actually had the highest mean at 6,116 shares, but this is most
 likely due to the outlier with a total of 843,300 shares. Out of the
 other six shares listed, Lifestyle and Social Media are the highest with
 total shares in the 3,700’s. The World data channel has the lowest total
-share count at 2,310. Below is a barplot to help show these results.
+share count at 2,310. Below is a barplot and box and whisker plot to
+help show these results in a graphical form.
 
 ``` r
 # Creating base for graph
@@ -168,6 +202,17 @@ g + stat_summary(fun = "mean", geom = "bar", color = "blue", fill = "blue") +
 ```
 
 ![](ST558Project2_files/figure-gfm/plot1-1.png)<!-- -->
+
+``` r
+g <- ggplot(newsPopTrain, aes(x = data_channel, y = shares))
+g + geom_boxplot(color = "green") +
+  ylim(0, 10000) +
+  labs(x = "Data Channel", y = "Shares", title = "Shares per Data Channel")
+```
+
+    ## Warning: Removed 1520 rows containing non-finite values (`stat_boxplot()`).
+
+![](ST558Project2_files/figure-gfm/plot2-1.png)<!-- -->
 
 We are curious to see if the variables that we have selected have any
 correlation. In order to check this, a correlation plot has been
@@ -188,31 +233,6 @@ corrplot(newsPopTrainCorr, type="lower", add=TRUE, tl.pos="n", number.cex=0.5)
 
 ![](ST558Project2_files/figure-gfm/corr-1.png)<!-- -->
 
-``` r
-summary(newsPopTrain)
-```
-
-    ##  n_tokens_title n_unique_tokens     num_imgs         num_videos    
-    ##  Min.   : 2.0   Min.   :0.0000   Min.   :  0.000   Min.   : 0.000  
-    ##  1st Qu.: 9.0   1st Qu.:0.4708   1st Qu.:  1.000   1st Qu.: 0.000  
-    ##  Median :10.0   Median :0.5389   Median :  1.000   Median : 0.000  
-    ##  Mean   :10.4   Mean   :0.5302   Mean   :  4.557   Mean   : 1.244  
-    ##  3rd Qu.:12.0   3rd Qu.:0.6082   3rd Qu.:  4.000   3rd Qu.: 1.000  
-    ##  Max.   :23.0   Max.   :1.0000   Max.   :128.000   Max.   :75.000  
-    ##                                                                    
-    ##   num_keywords    rate_positive_words rate_negative_words     shares      
-    ##  Min.   : 1.000   Min.   :0.0000      Min.   :0.0000      Min.   :     4  
-    ##  1st Qu.: 6.000   1st Qu.:0.6000      1st Qu.:0.1848      1st Qu.:   947  
-    ##  Median : 7.000   Median :0.7143      Median :0.2778      Median :  1400  
-    ##  Mean   : 7.237   Mean   :0.6828      Mean   :0.2870      Mean   :  3425  
-    ##  3rd Qu.: 9.000   3rd Qu.:0.8000      3rd Qu.:0.3824      3rd Qu.:  2800  
-    ##  Max.   :10.000   Max.   :1.0000      Max.   :1.0000      Max.   :843300  
-    ##                                                                           
-    ##         data_channel 
-    ##  Business     :4381  
-    ##  Entertainment:4949  
-    ##  Lifestyle    :1433  
-    ##  Miscellaneous:4273  
-    ##  SocialMedia  :1634  
-    ##  Tech         :5231  
-    ##  World        :5849
+Based on the correlation plots, none of the variables seem to be highly
+correlated (near 1). This is good news in our case to predict the number
+of shares.

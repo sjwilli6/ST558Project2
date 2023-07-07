@@ -88,7 +88,7 @@ Another thing that we wanted to look at was the number of shares for each data c
 tapply(newsPopTrain$shares, newsPopTrain$data_channel, summary)
 ```
 
-Based on the summary from the training data set, the Miscellaneous channel actually had the highest mean at 6,116 shares, but this is most likely due to the outlier with a total of 843,300 shares. Out of the other six shares listed, Lifestyle and Social Media are the highest with total shares in the 3,700's. The World data channel has the lowest total share count at 2,310. Below is a barplot to help show these results.
+Based on the summary from the training data set, the Miscellaneous channel actually had the highest mean at 6,116 shares, but this is most likely due to the outlier with a total of 843,300 shares. Out of the other six shares listed, Lifestyle and Social Media are the highest with total shares in the 3,700's. The World data channel has the lowest total share count at 2,310. Below is a barplot and box and whisker plot to help show these results in a graphical form.
 
 ```{r plot1, include=TRUE}
 # Creating base for graph
@@ -96,6 +96,13 @@ g <- ggplot(newsPopTrain, aes(x = data_channel, y = shares))
 # Adding bars to the graph
 g + stat_summary(fun = "mean", geom = "bar", color = "blue", fill = "blue") +
   # Creating labels and titles for graph
+  labs(x = "Data Channel", y = "Shares", title = "Shares per Data Channel")
+```
+
+```{r plot2, include=TRUE}
+g <- ggplot(newsPopTrain, aes(x = data_channel, y = shares))
+g + geom_boxplot(color = "green") +
+  ylim(0, 10000) +
   labs(x = "Data Channel", y = "Shares", title = "Shares per Data Channel")
 ```
 
