@@ -50,8 +50,8 @@ We want to subset the data to work based on the different data channel of intere
 library(tidyverse)
 # Create new variable data_channel
 newsPop <- newsPop %>% mutate(data_channel = case_when(data_channel_is_bus == 1 ~ "Business", data_channel_is_entertainment == 1 ~ "Entertainment", data_channel_is_lifestyle == 1 ~ "Lifestyle", data_channel_is_socmed == 1 ~ "SocialMedia", data_channel_is_tech == 1 ~ "Tech", data_channel_is_world == 1 ~ "World"))
-# Replace any missing values
-newsPop$data_channel <- replace_na(newsPop$data_channel, "Other")
+# Replace any missing values with "Miscellaneous"
+newsPop$data_channel <- replace_na(newsPop$data_channel, "Miscellaneous")
 # Make data_channel a factor variable
 newsPop$data_channel <- as.factor(newsPop$data_channel)
 ```
@@ -59,5 +59,26 @@ newsPop$data_channel <- as.factor(newsPop$data_channel)
 Since we have added a new `data_channel` variable with the appropriate variables, the data_channel_is* variables can be removed from our data set.
 
 ```{r remove, include=TRUE}
+# Remove data_channel_is*
 newsPop <- newsPop[ , -c(6:11)]
+```
+
+# Summarizations
+
+The first thing that we wanted to look at was the number of shares for each data channel. One way to look at this is using a number summary to compare the means.
+
+```{r table1, include=TRUE}
+# Number summary
+tapply(newsPop$shares, newsPop$data_channel, summary)
+```
+
+Based on the summary, the Miscellaneous channel actually had the highest mean at 5945 shares, but this is most likely due to the outlier with a total of 843,300 shares. Out of the other six shares listed, Lifestyle and Social Media are the highest with total shares in the 3,600's. The World data channel has the lowest total share count at 2,288. Below is a barplot to help show these results.
+
+```{r plot1, include=TRUE}
+# Creating base for graph
+g <- ggplot(newsPop, aes(x = data_channel, y = shares))
+# Adding bars to the graph
+g + stat_summary(fun = "mean", geom = "bar", color = "blue", fill = "blue") +
+  # Creating labels and titles for graph
+  labs(x = "Data Channel", y = "Shares", title = "Shares per Data Channel")
 ```

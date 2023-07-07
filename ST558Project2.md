@@ -7,6 +7,7 @@ Spencer Williams & Stephen Macropoulos
 - <a href="#purpose-and-methods" id="toc-purpose-and-methods">Purpose and
   Methods</a>
 - <a href="#reading-in-data" id="toc-reading-in-data">Reading in Data</a>
+- <a href="#summarizations" id="toc-summarizations">Summarizations</a>
 
 # Introduction
 
@@ -83,62 +84,74 @@ library(tidyverse)
 ``` r
 # Create new variable data_channel
 newsPop <- newsPop %>% mutate(data_channel = case_when(data_channel_is_bus == 1 ~ "Business", data_channel_is_entertainment == 1 ~ "Entertainment", data_channel_is_lifestyle == 1 ~ "Lifestyle", data_channel_is_socmed == 1 ~ "SocialMedia", data_channel_is_tech == 1 ~ "Tech", data_channel_is_world == 1 ~ "World"))
-# Replace any missing values
-newsPop$data_channel <- replace_na(newsPop$data_channel, "Other")
+# Replace any missing values with "Miscellaneous"
+newsPop$data_channel <- replace_na(newsPop$data_channel, "Miscellaneous")
 # Make data_channel a factor variable
 newsPop$data_channel <- as.factor(newsPop$data_channel)
-head(newsPop)
 ```
-
-    ##   n_tokens_title n_unique_tokens num_imgs num_videos num_keywords
-    ## 1             12       0.6635945        1          0            5
-    ## 2              9       0.6047431        1          0            4
-    ## 3              9       0.5751295        1          0            6
-    ## 4              9       0.5037879        1          0            7
-    ## 5             13       0.4156456       20          0            7
-    ## 6             10       0.5598886        0          0            9
-    ##   data_channel_is_lifestyle data_channel_is_entertainment data_channel_is_bus
-    ## 1                         0                             1                   0
-    ## 2                         0                             0                   1
-    ## 3                         0                             0                   1
-    ## 4                         0                             1                   0
-    ## 5                         0                             0                   0
-    ## 6                         0                             0                   0
-    ##   data_channel_is_socmed data_channel_is_tech data_channel_is_world
-    ## 1                      0                    0                     0
-    ## 2                      0                    0                     0
-    ## 3                      0                    0                     0
-    ## 4                      0                    0                     0
-    ## 5                      0                    1                     0
-    ## 6                      0                    1                     0
-    ##   rate_positive_words rate_negative_words shares  data_channel
-    ## 1           0.7692308           0.2307692    593 Entertainment
-    ## 2           0.7333333           0.2666667    711      Business
-    ## 3           0.8571429           0.1428571   1500      Business
-    ## 4           0.6666667           0.3333333   1200 Entertainment
-    ## 5           0.8602151           0.1397849    505          Tech
-    ## 6           0.5238095           0.4761905    855          Tech
 
 Since we have added a new `data_channel` variable with the appropriate
 variables, the data_channel_is\* variables can be removed from our data
 set.
 
 ``` r
+# Remove data_channel_is*
 newsPop <- newsPop[ , -c(6:11)]
-head(newsPop)
 ```
 
-    ##   n_tokens_title n_unique_tokens num_imgs num_videos num_keywords
-    ## 1             12       0.6635945        1          0            5
-    ## 2              9       0.6047431        1          0            4
-    ## 3              9       0.5751295        1          0            6
-    ## 4              9       0.5037879        1          0            7
-    ## 5             13       0.4156456       20          0            7
-    ## 6             10       0.5598886        0          0            9
-    ##   rate_positive_words rate_negative_words shares  data_channel
-    ## 1           0.7692308           0.2307692    593 Entertainment
-    ## 2           0.7333333           0.2666667    711      Business
-    ## 3           0.8571429           0.1428571   1500      Business
-    ## 4           0.6666667           0.3333333   1200 Entertainment
-    ## 5           0.8602151           0.1397849    505          Tech
-    ## 6           0.5238095           0.4761905    855          Tech
+# Summarizations
+
+The first thing that we wanted to look at was the number of shares for
+each data channel. One way to look at this is using a number summary to
+compare the means.
+
+``` r
+# Number summary
+tapply(newsPop$shares, newsPop$data_channel, summary)
+```
+
+    ## $Business
+    ##     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+    ##      1.0    952.2   1400.0   3063.0   2500.0 690400.0 
+    ## 
+    ## $Entertainment
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    ##      47     833    1200    2970    2100  210300 
+    ## 
+    ## $Lifestyle
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    ##      28    1100    1700    3682    3250  208300 
+    ## 
+    ## $Miscellaneous
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    ##       4    1100    1900    5945    4700  843300 
+    ## 
+    ## $SocialMedia
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    ##       5    1400    2100    3629    3800  122800 
+    ## 
+    ## $Tech
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    ##      36    1100    1700    3072    3000  663600 
+    ## 
+    ## $World
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    ##      35     827    1100    2288    1900  284700
+
+Based on the summary, the Miscellaneous channel actually had the highest
+mean at 5945 shares, but this is most likely due to the outlier with a
+total of 843,300 shares. Out of the other six shares listed, Lifestyle
+and Social Media are the highest with total shares in the 3,600’s. The
+World data channel has the lowest total share count at 2,288. Below is a
+barplot to help show these results.
+
+``` r
+# Creating base for graph
+g <- ggplot(newsPop, aes(x = data_channel, y = shares))
+# Adding bars to the graph
+g + stat_summary(fun = "mean", geom = "bar", color = "blue", fill = "blue") +
+  # Creating labels and titles for graph
+  labs(x = "Data Channel", y = "Shares", title = "Shares per Data Channel")
+```
+
+![](ST558Project2_files/figure-gfm/plot1-1.png)<!-- -->
