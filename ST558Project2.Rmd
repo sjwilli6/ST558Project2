@@ -78,6 +78,7 @@ newsPopTest <- newsPop[-sub, ]
 We wanted to see the summary statistics of each variable that we are using to predict the number of shares. The statistics will include the minimum, maximum, mean, median, and quartiles.
 
 ```{r summary, include=TRUE}
+# Summary
 summary(newsPopTrain)
 ```
 
@@ -100,8 +101,11 @@ g + stat_summary(fun = "mean", geom = "bar", color = "blue", fill = "blue") +
 ```
 
 ```{r plot2, include=TRUE}
+# Creating base for graph
 g <- ggplot(newsPopTrain, aes(x = data_channel, y = shares))
+# Adding boxplot to the graph
 g + geom_boxplot(color = "green") +
+  # Setting y-axis limit and labels
   ylim(0, 10000) +
   labs(x = "Data Channel", y = "Shares", title = "Shares per Data Channel")
 ```
@@ -109,11 +113,49 @@ g + geom_boxplot(color = "green") +
 We are curious to see if the variables that we have selected have any correlation. In order to check this, a correlation plot has been created.
 
 ```{r corr, include=TRUE}
+# Load library
 library(corrplot)
+# Remove non-numeric variable
 newsPopTrain1 <- newsPopTrain[ , -c(9)]
+# Find the correlation and plot the graph
 newsPopTrainCorr <- cor(newsPopTrain1)
 corrplot(newsPopTrainCorr, type="upper", method="number", tl.pos="lt", number.cex=0.5)
 corrplot(newsPopTrainCorr, type="lower", add=TRUE, tl.pos="n", number.cex=0.5)
 ```
 
 Based on the correlation plots, none of the variables seem to be highly correlated (near 1). This is good news in our case to predict the number of shares.
+
+# Modeling
+
+The first linear regression model will consist of the predictive variables that we have chosen. After looking at the significance level of each variable, our second linear regression model will be selected.
+
+```{r reg, include=TRUE}
+# Create a linear regression
+model1 <- lm(shares ~ ., data = newsPopTrain) 
+summary(model1)
+```
+
+The model seems to be significant at predicting the number of shares with an F-statistic of 23.28, corresponding to a small p-value. Out of all the variables used for prediction, only 5 variables are significant. Therefore, our next linear regression model will focus on these significant variables.
+
+#
+#
+#
+
+We are going to analyze the (random forest model)[https://towardsdatascience.com/understanding-random-forest-58381e0602d2]. This model allows a user to combine multiple trees from bootstrap samples. In most cases, the bagged trees predictions are more correlated which will result in a smaller reduction in variance from aggregation.
+
+```{r randomForest, include=TRUE}
+# Load library
+library(randomForest)
+# Produce random forest model
+newsPopFit_rf <- randomForest(shares ~ ., data = newsPopTrain, mtry = ncol(newsPopTrain)/3, ntree=200, importance=TRUE)
+newsPopPred_rf <- predict(newsPopFit_rf, newdata = newsPopTest)
+newsPopPred_model1 <- predict(model1, newdata = newsPopTest)
+# Find RMSE
+RMSE_rf <- sqrt(mean((newsPopPred_rf-newsPopTest$shares)^2))
+model1_RMSE <- sqrt(mean((newsPopPred_model1-newsPopTest$shares)^2))
+# See results
+RMSE_rf
+model1_RMSE
+```
+
+I compared the full linear regression model with all the variables to the random forest model. In order to compare the two models, I decided to use the RMSE. Based on the results, the linear regression model would be preffered because it has a lower RMSE.

@@ -10,6 +10,10 @@ Spencer Williams & Stephen Macropoulos
   - <a href="#splitting-the-data" id="toc-splitting-the-data">Splitting the
     Data</a>
 - <a href="#summarizations" id="toc-summarizations">Summarizations</a>
+- <a href="#modeling" id="toc-modeling">Modeling</a>
+- <a href="#section" id="toc-section"></a>
+- <a href="#section-1" id="toc-section-1"></a>
+- <a href="#section-2" id="toc-section-2"></a>
 
 # Introduction
 
@@ -236,3 +240,113 @@ corrplot(newsPopTrainCorr, type="lower", add=TRUE, tl.pos="n", number.cex=0.5)
 Based on the correlation plots, none of the variables seem to be highly
 correlated (near 1). This is good news in our case to predict the number
 of shares.
+
+# Modeling
+
+The first linear regression model will consist of the predictive
+variables that we have chosen. After looking at the significance level
+of each variable, our second linear regression model will be selected.
+
+``` r
+model1 <- lm(shares ~ ., data = newsPopTrain) 
+summary(model1)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = shares ~ ., data = newsPopTrain)
+    ## 
+    ## Residuals:
+    ##    Min     1Q Median     3Q    Max 
+    ##  -8144  -2189  -1477   -412 836939 
+    ## 
+    ## Coefficients:
+    ##                           Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)               1787.873    662.102   2.700 0.006932 ** 
+    ## n_tokens_title             100.359     35.322   2.841 0.004497 ** 
+    ## n_unique_tokens             97.017    817.220   0.119 0.905502    
+    ## num_imgs                    34.543      9.932   3.478 0.000506 ***
+    ## num_videos                  29.955     18.758   1.597 0.110293    
+    ## num_keywords                68.251     40.009   1.706 0.088036 .  
+    ## rate_positive_words       -289.139    670.582  -0.431 0.666344    
+    ## rate_negative_words       -460.933    729.734  -0.632 0.527624    
+    ## data_channelEntertainment -390.079    263.920  -1.478 0.139414    
+    ## data_channelLifestyle      572.444    378.988   1.510 0.130939    
+    ## data_channelMiscellaneous 2690.380    288.958   9.311  < 2e-16 ***
+    ## data_channelSocialMedia    619.146    355.940   1.739 0.081963 .  
+    ## data_channelTech          -239.925    255.971  -0.937 0.348604    
+    ## data_channelWorld         -866.662    251.906  -3.440 0.000582 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 12210 on 27736 degrees of freedom
+    ## Multiple R-squared:  0.0108, Adjusted R-squared:  0.01033 
+    ## F-statistic: 23.28 on 13 and 27736 DF,  p-value: < 2.2e-16
+
+The model seems to be significant at predicting the number of shares
+with an F-statistic of 23.28, corresponding to a small p-value. Out of
+all the variables used for prediction, only 5 variables are significant.
+Therefore, our next linear regression model will focus on these
+significant variables.
+
+# 
+
+# 
+
+# 
+
+We are going to analyze the (random forest
+model)\[<https://towardsdatascience.com/understanding-random-forest-58381e0602d2>\].
+This model allows a user to combine multiple trees from bootstrap
+samples. In most cases, the bagged trees predictions are more correlated
+which will result in a smaller reduction in variance from aggregation.
+
+``` r
+library(randomForest)
+```
+
+    ## randomForest 4.7-1.1
+
+    ## Type rfNews() to see new features/changes/bug fixes.
+
+    ## 
+    ## Attaching package: 'randomForest'
+
+    ## The following object is masked from 'package:dplyr':
+    ## 
+    ##     combine
+
+    ## The following object is masked from 'package:ggplot2':
+    ## 
+    ##     margin
+
+``` r
+newsPopFit_rf <- randomForest(shares ~ ., data = newsPopTrain, mtry = ncol(newsPopTrain)/3, ntree=200, importance=TRUE)
+newsPopPred_rf <- predict(newsPopFit_rf, newdata = newsPopTest)
+summary(newsPopPred_rf)
+```
+
+    ##     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+    ##    742.9   2028.3   2863.5   3620.8   4269.1 108866.8
+
+``` r
+newsPopPred_model1 <- predict(model1, newdata = newsPopTest)
+summary(newsPopPred_model1)
+```
+
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    ##    1375    2606    3019    3432    3670   72549
+
+``` r
+RMSE_rf <- sqrt(mean((newsPopPred_rf-newsPopTest$shares)^2))
+RMSE_rf
+```
+
+    ## [1] 10152.29
+
+``` r
+model1_RMSE <- sqrt(mean((newsPopPred_model1-newsPopTest$shares)^2))
+model1_RMSE
+```
+
+    ## [1] 9903.451
