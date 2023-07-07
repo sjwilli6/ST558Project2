@@ -59,7 +59,11 @@ sum(is.na(newsPop))
 
 We want to subset the data to work based on the different data channel
 of interest. Creating a new variable called `data_channel` will allow
-this to work successfully.
+this to work successfully. This way, we can turn our focus to a singular
+column as opposed to having six binary variables. We will use the
+`mutate` function in the *tidyverse* package. Replacing NA’s in the
+`data_channel` variable and setting it as a factor is very important in
+order to help us predict the total shares.
 
 ``` r
 library(tidyverse)
@@ -107,6 +111,30 @@ head(newsPop)
     ## 4                      0                    0                     0
     ## 5                      0                    1                     0
     ## 6                      0                    1                     0
+    ##   rate_positive_words rate_negative_words shares  data_channel
+    ## 1           0.7692308           0.2307692    593 Entertainment
+    ## 2           0.7333333           0.2666667    711      Business
+    ## 3           0.8571429           0.1428571   1500      Business
+    ## 4           0.6666667           0.3333333   1200 Entertainment
+    ## 5           0.8602151           0.1397849    505          Tech
+    ## 6           0.5238095           0.4761905    855          Tech
+
+Since we have added a new `data_channel` variable with the appropriate
+variables, the data_channel_is\* variables can be removed from our data
+set.
+
+``` r
+newsPop <- newsPop[ , -c(6:11)]
+head(newsPop)
+```
+
+    ##   n_tokens_title n_unique_tokens num_imgs num_videos num_keywords
+    ## 1             12       0.6635945        1          0            5
+    ## 2              9       0.6047431        1          0            4
+    ## 3              9       0.5751295        1          0            6
+    ## 4              9       0.5037879        1          0            7
+    ## 5             13       0.4156456       20          0            7
+    ## 6             10       0.5598886        0          0            9
     ##   rate_positive_words rate_negative_words shares  data_channel
     ## 1           0.7692308           0.2307692    593 Entertainment
     ## 2           0.7333333           0.2666667    711      Business

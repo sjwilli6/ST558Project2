@@ -54,5 +54,10 @@ newsPop <- newsPop %>% mutate(data_channel = case_when(data_channel_is_bus == 1 
 newsPop$data_channel <- replace_na(newsPop$data_channel, "Other")
 # Make data_channel a factor variable
 newsPop$data_channel <- as.factor(newsPop$data_channel)
-head(newsPop)
+```
+
+Since we have added a new `data_channel` variable with the appropriate variables, the data_channel_is* variables can be removed from our data set.
+
+```{r remove, include=TRUE}
+newsPop <- newsPop[ , -c(6:11)]
 ```
