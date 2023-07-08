@@ -3,12 +3,14 @@ Project 2
 Spencer Williams & Stephen Macropoulos
 2023-07-09
 
-- [Introduction](#introduction)
-- [Purpose and Methods](#purpose-and-methods)
-- [Reading in Data](#reading-in-data)
-  - [Splitting the Data](#splitting-the-data)
-- [Summarizations](#summarizations)
-- [Modeling](#modeling)
+- <a href="#introduction" id="toc-introduction">Introduction</a>
+- <a href="#purpose-and-methods" id="toc-purpose-and-methods">Purpose and
+  Methods</a>
+- <a href="#reading-in-data" id="toc-reading-in-data">Reading in Data</a>
+  - <a href="#splitting-the-data" id="toc-splitting-the-data">Splitting the
+    Data</a>
+- <a href="#summarizations" id="toc-summarizations">Summarizations</a>
+- <a href="#modeling" id="toc-modeling">Modeling</a>
 
 # Introduction
 
@@ -52,7 +54,7 @@ that will not be used to help us in our predictions.
 
 ``` r
 # Will need to change this depending on who is working!
-newsPop <- read.csv("C:/Users/Owner/Downloads/OnlineNewsPopularity.csv")
+newsPop <- read.csv("/Users/monicabeingolea/Documents/ST558/OnlineNewsPopularity/OnlineNewsPopularity.csv")
 
 # Only selecting the columns of interest
 newsPop <- newsPop[ , c(3,5,10,11,13,14:19,49,50,61)]
@@ -534,8 +536,6 @@ bootstrap tree fit.
 # Load library
 library(randomForest)
 ```
-
-    ## Warning: package 'randomForest' was built under R version 4.1.3
 
     ## randomForest 4.7-1.1
 
@@ -1057,8 +1057,8 @@ newsPop1Pred_model1 <- predict(model1, newdata = newsPop1Test)
 newsPop1Pred_model2 <- predict(model2, newdata = newsPop1Test)
 ```
 
-    ## Warning in predict.lm(model2, newdata = newsPop1Test): prediction from a
-    ## rank-deficient fit may be misleading
+    ## Warning in predict.lm(model2, newdata = newsPop1Test): prediction from
+    ## rank-deficient fit; attr(*, "non-estim") has doubtful cases
 
 ``` r
 newsPop1Pred_rf <- predict(newsPopFit_rf, newdata = newsPop1Test)
