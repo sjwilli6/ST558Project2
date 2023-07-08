@@ -45,9 +45,7 @@ newsPop <- newsPop[ , c(3,5,10,11,13,14:19,49,50,61)]
 sum(is.na(newsPop))
 ```
 
-
 We want to subset the data to work based on the different data channel of interest. Creating a new variable called `data_channel` will allow this to work successfully. This way, we can turn our focus to a singular column as opposed to having six binary variables. We will use the `mutate` function in the *tidyverse* package. Replacing NA's in the `data_channel` variable and setting it as a factor is very important in order to help us predict the total shares.
-
 
 ```{r dataChannel, include=TRUE, warning=FALSE, error=FALSE, message=FALSE}
 library(tidyverse)
@@ -59,7 +57,7 @@ newsPop$data_channel <- replace_na(newsPop$data_channel, "Miscellaneous")
 newsPop$data_channel <- as.factor(newsPop$data_channel)
 ```
 
-Since we have added a new `data_channel` variable with the appropriate variables, the data_channel_is_* variables can be removed from our data set. We will also subset the data to include only observations with the data channel we want. The possible choices are Entertainment, SocialMedia, Tech, Business, Miscellaneous, World, and Lifestyle. 
+Since we have added a new `data_channel` variable with the appropriate variables, the data_channel_is_* variables can be removed from our data set. We will also subset the data to include only observations with the data channel we want. The possible choices are Entertainment, SocialMedia, Tech, Business, Miscellaneous, World, and Lifestyle.
 
 ```{r remove, include=TRUE, error=FALSE}
 datachannel <- "Entertainment"
@@ -70,7 +68,7 @@ newsPop1 <- newsPop[newsPop$data_channel==datachannel, ]
 newsPop1 <- newsPop1[,-9]
 ```
 
-### Splitting the Data
+## Splitting the Data
 
 ```{r split, include=TRUE}
 # Set seed
@@ -259,7 +257,7 @@ We will use linear regression to investigate which variables best predict the nu
 
 Linear regression is a statistical modeling procedure which optimally estimates the slope parameters (via least squares) for each explanatory variable in a pre-specified linear equation of the slopes. The assumption of error normality is often made in order to calculate confidence intervals and prediction intervals for the average and future responses respectively. The reliability of this technique depends on the accuracy of the chosen linear equation of the slope parameters. A misspecified model equation can severely mislead inference and result in very poor predictive power. Hence, the analyst often tries many different model equations with the most sensible explanatory variables for the given response until the parameter estimates are statistically significant and the information criteria are relatively optimized. 
 
-The first linear regression model will consist of all the predictive variables that we have chosen (omitting the `sharesgroups` variable) in linear form. After looking at the significance level of each variable, our second linear regression model will be selected.
+The first linear regression model will consist of all the predictive variables that we have chosen (omitting the `sharesgroups` variable) in linear form. After looking at the significance level of each variable, our second linear regression model will be selected. This has been selected based on the results for every data channel combined, so we will analyze each one using the same two models.
 
 ```{r reg, include=TRUE}
 newsPop1Train <- newsPop1Train[,-9]
