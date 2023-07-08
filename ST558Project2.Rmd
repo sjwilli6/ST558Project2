@@ -14,16 +14,16 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Introduction
 
-The (Online News Popularity)[https://archive.ics.uci.edu/dataset/332/online+news+popularity] is a data set with a heterogeneous set of features about articles published by (Mashable)[www.mashable.com]. Multivariate data was gathered on sixty-one variables over a two year span. Our end result is to predict the number of shares in social networks. Below are some of the variables we will be looking at to help our prediction.
+The (Online News Popularity)[https://archive.ics.uci.edu/dataset/332/online+news+popularity] is a data set with a heterogeneous set of features about articles published by (Mashable)[www.mashable.com]. Multivariate data was gathered on sixty-one variables over a two year span. Our end goal is to predict the number of shares in social networks. Below are some of the variables we will be looking at to help our prediction.
 
-`Shares` - Number of shares (target)
-`n_tokens_title` - Number of words in the title
-`n_unique_tokens` - Rate of unique words in the content
-`num_imgs` - Number of images
-`num_videos` - Number of videos
-`num_keywords` - Number of keywords in the metadata
-`data_channel_is *` - There are six binary variables that will only be attributed to one variable. Theses include lifestyle, entertainment, business, social media, tech, and world.
-`rate_positive_words` - Rate of positive words among non-neutral
+`Shares` - Number of shares (target)  
+`n_tokens_title` - Number of words in the title  
+`n_unique_tokens` - Rate of unique words in the content  
+`num_imgs` - Number of images  
+`num_videos` - Number of videos  
+`num_keywords` - Number of keywords in the metadata  
+`data_channel_is *` - There are six binary variables which will be combined into one column. Theses include lifestyle, entertainment, business, social media, tech, and world  
+`rate_positive_words` - Rate of positive words among non-neutral  
 `rate_negative_words` - Rate of negative words among non-neutral
 
 # Purpose and Methods
@@ -32,21 +32,24 @@ Our end goal is to be able to predict the number of shares based on having data 
 
 # Reading in Data
 
-The read.csv() file name will change depending on who is importing the Online News Popularity data. We have dropped any unneccessary variables that will not be used to help us in our predictions.
+The `read.csv()` filename will change depending on who is importing the Online News Popularity data. We have dropped any unnecessary variables that will not be used to help us in our predictions.
 
-```{r read, include=TRUE}
+```{r read, include=TRUE, error=FALSE}
 # Will need to change this depending on who is working!
-newsPop <- read.csv("/Users/monicabeingolea/Documents/ST558/OnlineNewsPopularity/OnlineNewsPopularity.csv")
+newsPop <- read.csv("C:/Users/Owner/Downloads/OnlineNewsPopularity.csv")
+
 # Only selecting the columns of interest
 newsPop <- newsPop[ , c(3,5,10,11,13,14:19,49,50,61)]
+
 # Check for missing values
 sum(is.na(newsPop))
 ```
 
+
 We want to subset the data to work based on the different data channel of interest. Creating a new variable called `data_channel` will allow this to work successfully. This way, we can turn our focus to a singular column as opposed to having six binary variables. We will use the `mutate` function in the *tidyverse* package. Replacing NA's in the `data_channel` variable and setting it as a factor is very important in order to help us predict the total shares.
 
 
-```{r dataChannel, include=TRUE}
+```{r dataChannel, include=TRUE, warning=FALSE, error=FALSE}
 library(tidyverse)
 # Create new variable data_channel
 newsPop <- newsPop %>% mutate(data_channel = case_when(data_channel_is_bus == 1 ~ "Business", data_channel_is_entertainment == 1 ~ "Entertainment", data_channel_is_lifestyle == 1 ~ "Lifestyle", data_channel_is_socmed == 1 ~ "SocialMedia", data_channel_is_tech == 1 ~ "Tech", data_channel_is_world == 1 ~ "World"))
@@ -56,21 +59,32 @@ newsPop$data_channel <- replace_na(newsPop$data_channel, "Miscellaneous")
 newsPop$data_channel <- as.factor(newsPop$data_channel)
 ```
 
-Since we have added a new `data_channel` variable with the appropriate variables, the data_channel_is* variables can be removed from our data set.
+Since we have added a new `data_channel` variable with the appropriate variables, the data_channel_is_* variables can be removed from our data set. We will also subset the data to include only observations with the data channel we want. The possible choices are Entertainment, SocialMedia, Tech, Business, Miscellaneous, World, and Lifestyle. 
 
-```{r remove, include=TRUE}
+```{r remove, include=TRUE, error=FALSE}
+datachannel <- "Entertainment"
+
 # Remove data_channel_is*
-newsPop <- newsPop[ , -c(6:11)]
+newsPop <- newsPop[, -c(6:11)]
+newsPop1 <- newsPop[newsPop$data_channel==datachannel, ]
+newsPop1 <- newsPop1[,-9]
 ```
 
 ### Splitting the Data
+
 ```{r split, include=TRUE}
 # Set seed
 set.seed(5432)
 # split data into test and training sets
-sub <- sample(1:nrow(newsPop), 0.7 * nrow(newsPop))
-newsPopTrain <- newsPop[sub, ]
+sub <- sample(1:nrow(newsPop1), 0.7 * nrow(newsPop1))
+
+# for full data set
+newsPopTrain <- newsPop[sub,]
 newsPopTest <- newsPop[-sub, ]
+
+# for Entertainment data channel
+newsPop1Train <- newsPop1[sub, ]
+newsPop1Test <- newsPop1[-sub, ]
 ```
 
 # Summarizations
@@ -79,8 +93,10 @@ We wanted to see the summary statistics of each variable that we are using to pr
 
 ```{r summary, include=TRUE}
 # Summary
-summary(newsPopTrain)
+summary(newsPop1Train)
 ```
+
+It looks like the `n_unique_tokens`, `num_imgs`, `num_videos`, and `shares` variables are quite right-skewed in our training set. 
 
 Another thing that we wanted to look at was the number of shares for each data channel. One way to look at this is using a number summary to compare the means.
 
@@ -89,7 +105,40 @@ Another thing that we wanted to look at was the number of shares for each data c
 tapply(newsPopTrain$shares, newsPopTrain$data_channel, summary)
 ```
 
-Based on the summary from the training data set, the Miscellaneous channel actually had the highest mean at 6,116 shares, but this is most likely due to the outlier with a total of 843,300 shares. Out of the other six shares listed, Lifestyle and Social Media are the highest with total shares in the 3,700's. The World data channel has the lowest total share count at 2,310. Below is a barplot and box and whisker plot to help show these results in a graphical form.
+Based on the summary from the training data set, the Miscellaneous channel actually had the highest mean at 4,188 shares, but this is most likely due to the outlier with a total of 112,500 shares. Out of the other six shares listed, Business and Social Media are the highest with total shares in the 3,600's. The World data channel has the lowest total share count at 2,311. Below is a barplot and box and whisker plot to help show these results in a graphical form.
+
+Now let's take a look at some contingency tables. First, we group the shares values by thousands in a new column called `sharesgroups` and add it to the data set.
+
+```{r hist shares, warning=FALSE, error=FALSE}
+sharesgroups <- numeric()
+
+for (i in 1:length(newsPop1Train$shares)) {
+  sharesgroups[i] <- floor(newsPop1Train$shares[i]/1000)
+}
+
+#head(sharesgroups,100)
+
+newsPop1Train <- cbind(newsPop1Train,sharesgroups)
+```
+
+Now let's see the contingency table for `sharesgroups`.
+
+```{r contab 1}
+table(newsPop1Train$sharesgroups)
+```
+
+We see that most of the observations had less than 20,000 shares. There are larger jumps in thousands of shares once we get to around 70,000.
+
+Now let's take a look at a contingency table for the data channels.
+
+```{r contab 2}
+table(newsPopTrain$data_channel)
+```
+
+We see that the Business, Entertainment, Tech, and World data channels had more observations overall than the Lifestyle and Social Media data channels.
+
+
+Now let's look at the shares totals for each of the data channels in a bar plot.
 
 ```{r plot1, include=TRUE}
 # Creating base for graph
@@ -100,7 +149,11 @@ g + stat_summary(fun = "mean", geom = "bar", color = "blue", fill = "blue") +
   labs(x = "Data Channel", y = "Shares", title = "Shares per Data Channel")
 ```
 
-```{r plot2, include=TRUE}
+It appears that the total number of shares for each data channel are similar except for the Miscellaneous category. The Business and Social Media data channels had the most total shares while the World data channel had the least.
+
+Now let's see the boxplots to better understand the variability in those share totals.
+
+```{r plot2, include=TRUE, warning=FALSE}
 # Creating base for graph
 g <- ggplot(newsPopTrain, aes(x = data_channel, y = shares))
 # Adding boxplot to the graph
@@ -110,52 +163,182 @@ g + geom_boxplot(color = "green") +
   labs(x = "Data Channel", y = "Shares", title = "Shares per Data Channel")
 ```
 
-We are curious to see if the variables that we have selected have any correlation. In order to check this, a correlation plot has been created.
+It looks like the Social Media data channel had the highest median shares while the Entertainment and World data channels had the smallest median shares. 
 
-```{r corr, include=TRUE}
+We are curious to see if the variables that we have selected have any correlation between them. In order to check this, a correlation plot has been created.
+
+```{r corr, include=TRUE, warning=FALSE}
 # Load library
 library(corrplot)
 # Remove non-numeric variable
-newsPopTrain1 <- newsPopTrain[ , -c(9)]
+newsPopTrain_ <- newsPopTrain[ , -9]
 # Find the correlation and plot the graph
-newsPopTrainCorr <- cor(newsPopTrain1)
+newsPopTrainCorr <- cor(newsPopTrain_)
 corrplot(newsPopTrainCorr, type="upper", method="number", tl.pos="lt", number.cex=0.5)
 corrplot(newsPopTrainCorr, type="lower", add=TRUE, tl.pos="n", number.cex=0.5)
 ```
 
-Based on the correlation plots, none of the variables seem to be highly correlated (near 1). This is good news in our case to predict the number of shares.
+Based on the correlation plots, only one of the variable-pairs seems to be highly correlated (near 1 in magnitude). The strongest negative correlation is -0.85 between `rate_positive_words` and `rate_negative_words`. This is good news in our case to predict the number of shares.
+
+Let's also check out some scatterplots for the Entertainment training set. First, we look at `shares` vs `n_tokens_title`.
+
+```{r scatter1}
+g <- ggplot(newsPop1Train, aes(x = n_tokens_title, y = shares))
+g + labs(title = "Shares vs Words in Title") +
+  geom_point(alpha = 0.6, size = 2, position = "jitter") 
+```
+
+It seems there is a negative quadratic relationship between the number of shares and the number of words in the title. 
+
+Now let's look at the same plot but for the `n_unique_tokens` variable. We remove the extreme outlier first. 
+
+```{r scatter2}
+newsPop1Train <- newsPop1Train[-915,]
+
+g <- ggplot(newsPop1Train, aes(x = n_unique_tokens, y = shares))
+g + labs(title = "Shares vs Unique Words") +
+  geom_point(alpha = 0.6, size = 2, position = "jitter") 
+```
+
+It seems there is a negative quadratic relationship between the number of shares and the number of unique words in the content.
+
+Now let's look at the scatter plot of `shares` vs `num_imgs`.
+
+```{r scatter3}
+g <- ggplot(newsPop1Train, aes(x = num_imgs, y = shares))
+g + labs(title = "Shares vs Images") +
+  geom_point(alpha = 0.6, size = 2, position = "jitter")
+```
+
+There appears to be a negative relationship between the number of shares and the number of images.
+
+Now let's look at the scatter plot of `shares` vs `num_videos`.
+
+```{r scatter4}
+g <- ggplot(newsPop1Train, aes(x = num_videos, y = shares))
+g + labs(title = "Shares vs Videos") +
+  geom_point(alpha = 0.6, size = 2, position = "jitter")
+```
+
+This plot looks very similar to the Shares vs Images plot!
+
+Now let's look at the scatter plot of `shares` vs `num_keywords`.
+
+```{r scatter5}
+g <- ggplot(newsPop1Train, aes(x = num_keywords, y = shares))
+g + labs(title = "Shares vs Keywords") +
+  geom_point(alpha = 0.6, size = 2, position = "jitter")
+```
+
+There seems to be a slight positive relationship between the number of shares and the number of keywords.
+
+Now let's look at the scatter plot of `shares` vs `rate_positive_words``.
+
+```{r scatter6}
+g <- ggplot(newsPop1Train, aes(x = rate_positive_words, y = shares))
+g + labs(title = "Shares vs Positive Word Rate") +
+  geom_point(alpha = 0.6, size = 2, position = "jitter")
+```
+
+There seems to be a slight positive relationship between the positive word rate and the number of shares. 
+
+And finally let's look at the scatter plot of `shares` vs `rate_negative_words``.
+
+```{r scatter7}
+g <- ggplot(newsPop1Train, aes(x = rate_negative_words, y = shares))
+g + labs(title = "Shares vs Negative Word Rate") +
+  geom_point(alpha = 0.6, size = 2, position = "jitter")
+```
+
+It seems there is a negative relationship between the number of shares and the negative word rate. 
 
 # Modeling
 
-The first linear regression model will consist of the predictive variables that we have chosen. After looking at the significance level of each variable, our second linear regression model will be selected.
+We will use linear regression to investigate which variables best predict the number of shares. 
+
+Linear regression is a statistical modeling procedure which optimally estimates the slope parameters (via least squares) for each explanatory variable in a pre-specified linear equation of the slopes. The assumption of error normality is often made in order to calculate confidence intervals and prediction intervals for the average and future responses respectively. The reliability of this technique depends on the accuracy of the chosen linear equation of the slope parameters. A misspecified model equation can severely mislead inference and result in very poor predictive power. Hence, the analyst often tries many different model equations with the most sensible explanatory variables for the given response until the parameter estimates are statistically significant and the information criteria are relatively optimized. 
+
+The first linear regression model will consist of all the predictive variables that we have chosen (omitting the `sharesgroups` variable) in linear form. After looking at the significance level of each variable, our second linear regression model will be selected.
 
 ```{r reg, include=TRUE}
+newsPop1Train <- newsPop1Train[,-9]
+
 # Create a linear regression
-model1 <- lm(shares ~ ., data = newsPopTrain) 
+model1 <- lm(shares ~ ., data = newsPop1Train) 
 summary(model1)
 ```
 
-The model seems to be significant at predicting the number of shares with an F-statistic of 23.28, corresponding to a small p-value. Out of all the variables used for prediction, only 5 variables are significant. Therefore, our next linear regression model will focus on these significant variables.
+The model seems to be significant at predicting the number of shares with an F-statistic of 3.064, corresponding to a small p-value of 0.003205. Out of all the variables used for prediction, only 2 variables are significant (p-value < 0.05). Therefore, our next linear regression model will focus on these significant variables.
 
-#
-#
-#
+```{r reg2, include=TRUE}
+# Create a linear regression
 
-We are going to analyze the (random forest model)[https://towardsdatascience.com/understanding-random-forest-58381e0602d2]. This model allows a user to combine multiple trees from bootstrap samples. In most cases, the bagged trees predictions are more correlated which will result in a smaller reduction in variance from aggregation.
+model2 <- lm(shares ~ num_imgs + num_videos + 
+               num_keywords + rate_positive_words + 
+               rate_negative_words + poly(n_tokens_title,2) +
+               poly(n_unique_tokens,2), 
+               data = newsPop1Train)
+ 
+summary(model2)
+```
+
+It looks like the omission of the other variables did not improve the adjusted R-squared value very much but the overall F statistic increased to 3.531 and the p-value reduced to 0.0002245. 
+
+
+
+We are going to analyze the (random forest model)[https://towardsdatascience.com/understanding-random-forest-58381e0602d2]. This model allows a user to combine multiple trees from bootstrap samples. In most cases, the bagged trees predictions are more correlated which will result in a smaller reduction in variance from aggregation. The random forest model uses a random subset of the predictors for each bootstrap tree fit. 
 
 ```{r randomForest, include=TRUE}
 # Load library
 library(randomForest)
 # Produce random forest model
-newsPopFit_rf <- randomForest(shares ~ ., data = newsPopTrain, mtry = ncol(newsPopTrain)/3, ntree=200, importance=TRUE)
-newsPopPred_rf <- predict(newsPopFit_rf, newdata = newsPopTest)
-newsPopPred_model1 <- predict(model1, newdata = newsPopTest)
-# Find RMSE
-RMSE_rf <- sqrt(mean((newsPopPred_rf-newsPopTest$shares)^2))
-model1_RMSE <- sqrt(mean((newsPopPred_model1-newsPopTest$shares)^2))
-# See results
-RMSE_rf
-model1_RMSE
+newsPopFit_rf <- randomForest(shares ~ ., data = newsPop1Train, 
+                              mtry = ncol(newsPop1Train)/3, 
+                              ntree=200, importance=TRUE)
+
 ```
 
-I compared the full linear regression model with all the variables to the random forest model. In order to compare the two models, I decided to use the RMSE. Based on the results, the linear regression model would be preffered because it has a lower RMSE.
+We will also use a boosted tree model to predict the number of shares. 
+
+Boosted trees are a general approach that can be applied to trees. The trees are grown sequentially, each subsequent tree is grown on a modified version of the original data, and predictions are updated as the trees are grown. Cross validation is also used to select the shrinkage and depth parameters. 
+
+```{r, warning=FALSE}
+library(caret)
+n.trees <- c(25,50,100,150,200)
+interaction.depth <- 1:4
+shrinkage <- 0.1
+n.minobsinnode <- 10
+X <- expand.grid(n.trees = n.trees, interaction.depth = interaction.depth,
+            shrinkage = shrinkage, n.minobsinnode = n.minobsinnode)
+
+newsPopFit_boost <- train(shares ~ ., data = newsPop1Train,
+               method = "gbm",
+               trControl = trainControl(method = "cv", number = 5),
+               tuneGrid = X)
+```
+
+
+Now we get the RMSE from each model and find the best one. The model with the highest predictive power will have the smallest RMSE.
+
+```{r compare}
+newsPop1Pred_model1 <- predict(model1, newdata = newsPop1Test)
+newsPop1Pred_model2 <- predict(model2, newdata = newsPop1Test)
+newsPop1Pred_rf <- predict(newsPopFit_rf, newdata = newsPop1Test)
+newsPop1Pred_boost <- predict(newsPopFit_boost, newdata = newsPop1Test)
+
+# Find RMSE
+model1_RMSE <- round(sqrt(mean((newsPop1Pred_model1-newsPop1Test$shares)^2)),2)
+model2_RMSE <- round(sqrt(mean((newsPop1Pred_model2-newsPop1Test$shares)^2)),2)
+RMSE_rf <- round(sqrt(mean((newsPop1Pred_rf-newsPop1Test$shares)^2)),2)
+RMSE_boost <- round(sqrt(mean((newsPop1Pred_boost-newsPop1Test$shares)^2)),2)
+
+RMSE_mods <- c(model1_RMSE, "Full Linear Regression Model", 
+               model2_RMSE, "Curvi-Linear Regression Model", 
+               RMSE_rf, "Random Forest Model", 
+               RMSE_boost, "Boosted Tree Model")
+
+RMSE_mods
+
+paste("The", RMSE_mods[which(RMSE_mods==min(RMSE_mods))+1], "had the smallest RMSE of", RMSE_mods[which(RMSE_mods==min(RMSE_mods))])
+```
+
