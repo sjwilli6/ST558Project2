@@ -49,7 +49,7 @@ sum(is.na(newsPop))
 We want to subset the data to work based on the different data channel of interest. Creating a new variable called `data_channel` will allow this to work successfully. This way, we can turn our focus to a singular column as opposed to having six binary variables. We will use the `mutate` function in the *tidyverse* package. Replacing NA's in the `data_channel` variable and setting it as a factor is very important in order to help us predict the total shares.
 
 
-```{r dataChannel, include=TRUE, warning=FALSE, error=FALSE}
+```{r dataChannel, include=TRUE, warning=FALSE, error=FALSE, message=FALSE}
 library(tidyverse)
 # Create new variable data_channel
 newsPop <- newsPop %>% mutate(data_channel = case_when(data_channel_is_bus == 1 ~ "Business", data_channel_is_entertainment == 1 ~ "Entertainment", data_channel_is_lifestyle == 1 ~ "Lifestyle", data_channel_is_socmed == 1 ~ "SocialMedia", data_channel_is_tech == 1 ~ "Tech", data_channel_is_world == 1 ~ "World"))
@@ -188,7 +188,8 @@ g + labs(title = "Shares vs Words in Title") +
   geom_point(alpha = 0.6, size = 2, position = "jitter") 
 ```
 
-It seems there is a negative quadratic relationship between the number of shares and the number of words in the title. 
+We can inspect the trend of shares as a function of the number of words in the title. If the points show an upward trend, then articles with more words in the title tend to be shared more often. If we see a negative trend then articles with more words tend to be shared less often.
+
 
 Now let's look at the same plot but for the `n_unique_tokens` variable. We remove the extreme outlier first. 
 
@@ -200,7 +201,7 @@ g + labs(title = "Shares vs Unique Words") +
   geom_point(alpha = 0.6, size = 2, position = "jitter") 
 ```
 
-It seems there is a negative quadratic relationship between the number of shares and the number of unique words in the content.
+We can inspect the trend of shares as a function of the number of unique words in the content. If the points show an upward trend, then articles with more unique words in the title tend to be shared more often. If we see a negative trend then articles with more unique words tend to be shared less often.
 
 Now let's look at the scatter plot of `shares` vs `num_imgs`.
 
@@ -210,7 +211,7 @@ g + labs(title = "Shares vs Images") +
   geom_point(alpha = 0.6, size = 2, position = "jitter")
 ```
 
-There appears to be a negative relationship between the number of shares and the number of images.
+We can inspect the trend of shares as a function of the number of images. If the points show an upward trend, then articles with more images tend to be shared more often. If there is a negative trend, then articles with more images tend to be shared less often.
 
 Now let's look at the scatter plot of `shares` vs `num_videos`.
 
@@ -230,7 +231,7 @@ g + labs(title = "Shares vs Keywords") +
   geom_point(alpha = 0.6, size = 2, position = "jitter")
 ```
 
-There seems to be a slight positive relationship between the number of shares and the number of keywords.
+We can inspect the trend of shares as a function of the number of keywords. If the points show an upward trend, then articles with more keywords tend to be shared more often. If we see a negative trend then articles with more keywords tend to be shared less often.
 
 Now let's look at the scatter plot of `shares` vs `rate_positive_words``.
 
@@ -240,7 +241,7 @@ g + labs(title = "Shares vs Positive Word Rate") +
   geom_point(alpha = 0.6, size = 2, position = "jitter")
 ```
 
-There seems to be a slight positive relationship between the positive word rate and the number of shares. 
+We can inspect the trend of shares as a function of the positive word rate. If the points show an upward trend, then articles with more positive words tend to be shared more often. If we see a negative trend then articles with more positive words tend to be shared less often.
 
 And finally let's look at the scatter plot of `shares` vs `rate_negative_words``.
 
@@ -250,7 +251,7 @@ g + labs(title = "Shares vs Negative Word Rate") +
   geom_point(alpha = 0.6, size = 2, position = "jitter")
 ```
 
-It seems there is a negative relationship between the number of shares and the negative word rate. 
+This plot looks like the mirror image of the shares vs positive word rate plot!
 
 # Modeling
 
@@ -268,23 +269,20 @@ model1 <- lm(shares ~ ., data = newsPop1Train)
 summary(model1)
 ```
 
-The model seems to be significant at predicting the number of shares with an F-statistic of 3.064, corresponding to a small p-value of 0.003205. Out of all the variables used for prediction, only 2 variables are significant (p-value < 0.05). For the second linear regression model, we will use quadratic terms with the `n_tokens_title` and `n_unique_tokens` variables based on their scatterplots. 
+We can use the above output to gauge the strength of this model. If the overall p-value at the bottom is small then we can use the asterisks to see which are the most useful predictors in this model. 
 
 ```{r reg2, include=TRUE}
 # Create a linear regression
 
-model2 <- lm(shares ~ num_imgs + num_videos + 
-               num_keywords + rate_positive_words + 
-               rate_negative_words + poly(n_tokens_title,2) +
-               poly(n_unique_tokens,2), 
+model2 <- lm(shares ~ poly(n_tokens_title,2) + poly(n_unique_tokens,2) +
+               poly(num_imgs,2) + poly(num_videos,2) + poly(num_keywords,2) +
+               poly(rate_positive_words,2) + poly(rate_negative_words,2), 
                data = newsPop1Train)
  
 summary(model2)
 ```
 
-It looks like the omission of the other variables did not improve the adjusted R-squared value very much but the overall F statistic increased to 3.531 and the p-value reduced to 0.0002245. 
-
-
+We can use the above output to gauge the strength of this model. If the overall p-value at the bottom is small then we can use the asterisks to see which are the most useful predictors in this model. 
 
 We are going to analyze the (random forest model)[https://towardsdatascience.com/understanding-random-forest-58381e0602d2]. This model allows a user to combine multiple trees from bootstrap samples. In most cases, the bagged trees predictions are more correlated which will result in a smaller reduction in variance from aggregation. The random forest model uses a random subset of the predictors for each bootstrap tree fit. 
 

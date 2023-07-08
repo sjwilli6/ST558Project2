@@ -73,20 +73,6 @@ order to help us predict the total shares.
 
 ``` r
 library(tidyverse)
-```
-
-    ## -- Attaching core tidyverse packages ------------------------ tidyverse 2.0.0 --
-    ## v dplyr     1.1.2     v readr     2.1.4
-    ## v forcats   1.0.0     v stringr   1.5.0
-    ## v ggplot2   3.4.2     v tibble    3.2.1
-    ## v lubridate 1.9.2     v tidyr     1.3.0
-    ## v purrr     1.0.1     
-    ## -- Conflicts ------------------------------------------ tidyverse_conflicts() --
-    ## x dplyr::filter() masks stats::filter()
-    ## x dplyr::lag()    masks stats::lag()
-    ## i Use the ]8;;http://conflicted.r-lib.org/conflicted package]8;; to force all conflicts to become errors
-
-``` r
 # Create new variable data_channel
 newsPop <- newsPop %>% mutate(data_channel = case_when(data_channel_is_bus == 1 ~ "Business", data_channel_is_entertainment == 1 ~ "Entertainment", data_channel_is_lifestyle == 1 ~ "Lifestyle", data_channel_is_socmed == 1 ~ "SocialMedia", data_channel_is_tech == 1 ~ "Tech", data_channel_is_world == 1 ~ "World"))
 # Replace any missing values with "Miscellaneous"
@@ -329,8 +315,11 @@ g + labs(title = "Shares vs Words in Title") +
 
 ![](ST558Project2_files/figure-gfm/scatter1-1.png)<!-- -->
 
-It seems there is a negative quadratic relationship between the number
-of shares and the number of words in the title.
+We can inspect the trend of shares as a function of the number of words
+in the title. If the points show an upward trend, then articles with
+more words in the title tend to be shared more often. If we see a
+negative trend then articles with more words tend to be shared less
+often.
 
 Now let’s look at the same plot but for the `n_unique_tokens` variable.
 We remove the extreme outlier first.
@@ -345,8 +334,11 @@ g + labs(title = "Shares vs Unique Words") +
 
 ![](ST558Project2_files/figure-gfm/scatter2-1.png)<!-- -->
 
-It seems there is a negative quadratic relationship between the number
-of shares and the number of unique words in the content.
+We can inspect the trend of shares as a function of the number of unique
+words in the content. If the points show an upward trend, then articles
+with more unique words in the title tend to be shared more often. If we
+see a negative trend then articles with more unique words tend to be
+shared less often.
 
 Now let’s look at the scatter plot of `shares` vs `num_imgs`.
 
@@ -358,8 +350,10 @@ g + labs(title = "Shares vs Images") +
 
 ![](ST558Project2_files/figure-gfm/scatter3-1.png)<!-- -->
 
-There appears to be a negative relationship between the number of shares
-and the number of images.
+We can inspect the trend of shares as a function of the number of
+images. If the points show an upward trend, then articles with more
+images tend to be shared more often. If there is a negative trend, then
+articles with more images tend to be shared less often.
 
 Now let’s look at the scatter plot of `shares` vs `num_videos`.
 
@@ -383,8 +377,10 @@ g + labs(title = "Shares vs Keywords") +
 
 ![](ST558Project2_files/figure-gfm/scatter5-1.png)<!-- -->
 
-There seems to be a slight positive relationship between the number of
-shares and the number of keywords.
+We can inspect the trend of shares as a function of the number of
+keywords. If the points show an upward trend, then articles with more
+keywords tend to be shared more often. If we see a negative trend then
+articles with more keywords tend to be shared less often.
 
 Now let’s look at the scatter plot of `shares` vs
 \`rate_positive_words\`\`.
@@ -397,8 +393,10 @@ g + labs(title = "Shares vs Positive Word Rate") +
 
 ![](ST558Project2_files/figure-gfm/scatter6-1.png)<!-- -->
 
-There seems to be a slight positive relationship between the positive
-word rate and the number of shares.
+We can inspect the trend of shares as a function of the positive word
+rate. If the points show an upward trend, then articles with more
+positive words tend to be shared more often. If we see a negative trend
+then articles with more positive words tend to be shared less often.
 
 And finally let’s look at the scatter plot of `shares` vs
 \`rate_negative_words\`\`.
@@ -411,8 +409,8 @@ g + labs(title = "Shares vs Negative Word Rate") +
 
 ![](ST558Project2_files/figure-gfm/scatter7-1.png)<!-- -->
 
-It seems there is a negative relationship between the number of shares
-and the negative word rate.
+This plot looks like the mirror image of the shares vs positive word
+rate plot!
 
 # Modeling
 
@@ -470,20 +468,16 @@ summary(model1)
     ## Multiple R-squared:  0.004332,   Adjusted R-squared:  0.002918 
     ## F-statistic: 3.064 on 7 and 4930 DF,  p-value: 0.003205
 
-The model seems to be significant at predicting the number of shares
-with an F-statistic of 3.064, corresponding to a small p-value of
-0.003205. Out of all the variables used for prediction, only 2 variables
-are significant (p-value \< 0.05). For the second linear regression
-model, we will use quadratic terms with the `n_tokens_title` and
-`n_unique_tokens` variables based on their scatterplots.
+We can use the above output to gauge the strength of this model. If the
+overall p-value at the bottom is small then we can use the asterisks to
+see which are the most useful predictors in this model.
 
 ``` r
 # Create a linear regression
 
-model2 <- lm(shares ~ num_imgs + num_videos + 
-               num_keywords + rate_positive_words + 
-               rate_negative_words + poly(n_tokens_title,2) +
-               poly(n_unique_tokens,2), 
+model2 <- lm(shares ~ poly(n_tokens_title,2) + poly(n_unique_tokens,2) +
+               poly(num_imgs,2) + poly(num_videos,2) + poly(num_keywords,2) +
+               poly(rate_positive_words,2) + poly(rate_negative_words,2), 
                data = newsPop1Train)
  
 summary(model2)
@@ -491,36 +485,42 @@ summary(model2)
 
     ## 
     ## Call:
-    ## lm(formula = shares ~ num_imgs + num_videos + num_keywords + 
-    ##     rate_positive_words + rate_negative_words + poly(n_tokens_title, 
-    ##     2) + poly(n_unique_tokens, 2), data = newsPop1Train)
+    ## lm(formula = shares ~ poly(n_tokens_title, 2) + poly(n_unique_tokens, 
+    ##     2) + poly(num_imgs, 2) + poly(num_videos, 2) + poly(num_keywords, 
+    ##     2) + poly(rate_positive_words, 2) + poly(rate_negative_words, 
+    ##     2), data = newsPop1Train)
     ## 
     ## Residuals:
     ##    Min     1Q Median     3Q    Max 
-    ##  -5909  -2093  -1563   -680 206058 
+    ##  -5674  -2129  -1527   -542 206396 
     ## 
-    ## Coefficients:
-    ##                             Estimate Std. Error t value Pr(>|t|)   
-    ## (Intercept)                -2898.417   2144.896  -1.351  0.17666   
-    ## num_imgs                      23.225     11.371   2.043  0.04115 * 
-    ## num_videos                    -1.196     18.125  -0.066  0.94741   
-    ## num_keywords                 158.135     57.866   2.733  0.00630 **
-    ## rate_positive_words         5031.175   2229.765   2.256  0.02409 * 
-    ## rate_negative_words         4053.441   2238.787   1.811  0.07027 . 
-    ## poly(n_tokens_title, 2)1   10549.675   7681.447   1.373  0.16969   
-    ## poly(n_tokens_title, 2)2  -11968.714   7637.784  -1.567  0.11717   
-    ## poly(n_unique_tokens, 2)1 -27308.578  20540.679  -1.329  0.18375   
-    ## poly(n_unique_tokens, 2)2  52508.502  18597.711   2.823  0.00477 **
+    ## Coefficients: (1 not defined because of singularities)
+    ##                               Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)                     2918.6      108.4  26.926  < 2e-16 ***
+    ## poly(n_tokens_title, 2)1        9305.2     7702.7   1.208  0.22709    
+    ## poly(n_tokens_title, 2)2      -12366.1     7639.2  -1.619  0.10556    
+    ## poly(n_unique_tokens, 2)1     -32527.1    20809.7  -1.563  0.11810    
+    ## poly(n_unique_tokens, 2)2      65998.1    19610.9   3.365  0.00077 ***
+    ## poly(num_imgs, 2)1             20530.0     9230.7   2.224  0.02619 *  
+    ## poly(num_imgs, 2)2            -25754.9     7963.0  -3.234  0.00123 ** 
+    ## poly(num_videos, 2)1            2679.9     7902.2   0.339  0.73452    
+    ## poly(num_videos, 2)2           -9850.8     7640.8  -1.289  0.19738    
+    ## poly(num_keywords, 2)1         19310.7     7736.8   2.496  0.01259 *  
+    ## poly(num_keywords, 2)2        -12859.6     7656.4  -1.680  0.09310 .  
+    ## poly(rate_positive_words, 2)1  76693.0    29440.8   2.605  0.00922 ** 
+    ## poly(rate_positive_words, 2)2  -1910.2    15264.1  -0.125  0.90042    
+    ## poly(rate_negative_words, 2)1  51931.9    26683.2   1.946  0.05168 .  
+    ## poly(rate_negative_words, 2)2       NA         NA      NA       NA    
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 7625 on 4928 degrees of freedom
-    ## Multiple R-squared:  0.006407,   Adjusted R-squared:  0.004593 
-    ## F-statistic: 3.531 on 9 and 4928 DF,  p-value: 0.0002245
+    ## Residual standard error: 7617 on 4924 degrees of freedom
+    ## Multiple R-squared:  0.009379,   Adjusted R-squared:  0.006764 
+    ## F-statistic: 3.586 on 13 and 4924 DF,  p-value: 1.195e-05
 
-It looks like the omission of the other variables did not improve the
-adjusted R-squared value very much but the overall F statistic increased
-to 3.531 and the p-value reduced to 0.0002245.
+We can use the above output to gauge the strength of this model. If the
+overall p-value at the bottom is small then we can use the asterisks to
+see which are the most useful predictors in this model.
 
 We are going to analyze the (random forest
 model)\[<https://towardsdatascience.com/understanding-random-forest-58381e0602d2>\].
@@ -1055,6 +1055,12 @@ with the highest predictive power will have the smallest RMSE.
 ``` r
 newsPop1Pred_model1 <- predict(model1, newdata = newsPop1Test)
 newsPop1Pred_model2 <- predict(model2, newdata = newsPop1Test)
+```
+
+    ## Warning in predict.lm(model2, newdata = newsPop1Test): prediction from a
+    ## rank-deficient fit may be misleading
+
+``` r
 newsPop1Pred_rf <- predict(newsPopFit_rf, newdata = newsPop1Test)
 newsPop1Pred_boost <- predict(newsPopFit_boost, newdata = newsPop1Test)
 
@@ -1073,7 +1079,7 @@ RMSE_mods
 ```
 
     ## [1] "8329.6"                        "Full Linear Regression Model" 
-    ## [3] "8333.47"                       "Curvi-Linear Regression Model"
+    ## [3] "8321.63"                       "Curvi-Linear Regression Model"
     ## [5] "8467.05"                       "Random Forest Model"          
     ## [7] "8320.43"                       "Boosted Tree Model"
 
