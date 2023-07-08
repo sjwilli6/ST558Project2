@@ -268,7 +268,7 @@ model1 <- lm(shares ~ ., data = newsPop1Train)
 summary(model1)
 ```
 
-The model seems to be significant at predicting the number of shares with an F-statistic of 3.064, corresponding to a small p-value of 0.003205. Out of all the variables used for prediction, only 2 variables are significant (p-value < 0.05). Therefore, our next linear regression model will focus on these significant variables.
+The model seems to be significant at predicting the number of shares with an F-statistic of 3.064, corresponding to a small p-value of 0.003205. Out of all the variables used for prediction, only 2 variables are significant (p-value < 0.05). For the second linear regression model, we will use quadratic terms with the `n_tokens_title` and `n_unique_tokens` variables based on their scatterplots. 
 
 ```{r reg2, include=TRUE}
 # Create a linear regression
