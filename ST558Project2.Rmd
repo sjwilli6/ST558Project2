@@ -36,7 +36,7 @@ The `read.csv()` filename will change depending on who is importing the Online N
 
 ```{r read, include=TRUE, error=FALSE}
 # Will need to change this depending on who is working!
-newsPop <- read.csv("C:/Users/Owner/Downloads/OnlineNewsPopularity.csv")
+newsPop <- read.csv("/Users/monicabeingolea/Documents/ST558/OnlineNewsPopularity/OnlineNewsPopularity.csv")
 
 # Only selecting the columns of interest
 newsPop <- newsPop[ , c(3,5,10,11,13,14:19,49,50,61)]
@@ -293,10 +293,9 @@ library(randomForest)
 newsPopFit_rf <- randomForest(shares ~ ., data = newsPop1Train, 
                               mtry = ncol(newsPop1Train)/3, 
                               ntree=200, importance=TRUE)
-
 ```
 
-We will also use a boosted tree model to predict the number of shares. 
+We will also use a boosted tree model to predict the number of shares.
 
 Boosted trees are a general approach that can be applied to trees. The trees are grown sequentially, each subsequent tree is grown on a modified version of the original data, and predictions are updated as the trees are grown. Cross validation is also used to select the shrinkage and depth parameters. 
 
@@ -339,4 +338,5 @@ RMSE_mods
 
 paste("The", RMSE_mods[which(RMSE_mods==min(RMSE_mods))+1], "had the smallest RMSE of", RMSE_mods[which(RMSE_mods==min(RMSE_mods))])
 ```
+
 
