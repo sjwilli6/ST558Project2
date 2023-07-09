@@ -1098,9 +1098,10 @@ paste("The", RMSE_mods[which(RMSE_mods==min(RMSE_mods))+1], "had the smallest RM
 
 The analyses for each type of Data Channel can be found below:
 
-1.  [Business](../Business_DataChannel.html)
-2.  [Entertainment](../Entertainment_DataChannel.html)
-3.  [Lifestyle](../Lifestyle_DataChannel.html)
-4.  [Social Media](../SocialMedia_DataChannel.html)
-5.  [Tech](../Tech_DataChannel.html)
-6.  [World](../World_DataChannel.html)
+1.  [Business](https://github.com/sjwilli6/ST558Project2/blob/main/Business_DataChannel.md)
+2.  [Entertainment](https://github.com/sjwilli6/ST558Project2/blob/main/Entertainment_DataChannel.md)
+3.  [Lifestyle](https://github.com/sjwilli6/ST558Project2/blob/main/Lifestyle_DataChannel.md)
+4.  [Social
+    Media](https://github.com/sjwilli6/ST558Project2/blob/main/SocialMedia_DataChannel.md)
+5.  [Tech](https://github.com/sjwilli6/ST558Project2/blob/main/Tech_DataChannel.md)
+6.  [World](https://github.com/sjwilli6/ST558Project2/blob/main/World_DataChannel.md)
