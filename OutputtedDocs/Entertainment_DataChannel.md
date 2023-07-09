@@ -11,8 +11,6 @@ Spencer Williams & Stephen Macropoulos
     Data</a>
 - <a href="#summarizations" id="toc-summarizations">Summarizations</a>
 - <a href="#modeling" id="toc-modeling">Modeling</a>
-- <a href="#links-to-automated-documents"
-  id="toc-links-to-automated-documents">Links to Automated Documents</a>
 
 # Introduction
 
@@ -1093,13 +1091,3 @@ paste("The", RMSE_mods[which(RMSE_mods==min(RMSE_mods))+1], "had the smallest RM
 ```
 
     ## [1] "The Boosted Tree Model had the smallest RMSE of 8320.43"
-
-# Links to Automated Documents
-
-The analyses for each type of Data Channel can be found below:
-
-[Business](Business_DataChannel.html)
-[Entertainment](Entertainment_DataChannel.html)
-[Lifestyle](Lifestyle_DataChannel.html) [Social
-Media](SocialMedia_DataChannel.html) [Tech](Tech_DataChannel.html)
-[World](World_DataChannel.html)
