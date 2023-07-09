@@ -3,7 +3,7 @@
 # purpose: Render Project2 as a .md file called README.md for our repo.
 
 rmarkdown::render(
-  input="ST558Project2",
+  input="ST558Project2.Rmd",
   output_format = "github_document",
   output_file = "README.md",
   runtime = "static",
