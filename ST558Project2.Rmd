@@ -65,6 +65,8 @@ datachannel <- "Entertainment"
 # Remove data_channel_is*
 newsPop <- newsPop[, -c(6:11)]
 newsPop1 <- newsPop[newsPop$data_channel==datachannel, ]
+
+# Here is where we will do our automation process. We will specify each data channel using the filter function.
 newsPop1 <- newsPop1[,-9]
 ```
 
