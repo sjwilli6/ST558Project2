@@ -286,11 +286,6 @@ been created.
 ``` r
 # Load library
 library(corrplot)
-```
-
-    ## corrplot 0.92 loaded
-
-``` r
 # Remove non-numeric variable
 newsPopTrain_ <- newsPopTrain[ , -9]
 # Find the correlation and plot the graph
@@ -538,24 +533,6 @@ bootstrap tree fit.
 ``` r
 # Load library
 library(randomForest)
-```
-
-    ## randomForest 4.7-1.1
-
-    ## Type rfNews() to see new features/changes/bug fixes.
-
-    ## 
-    ## Attaching package: 'randomForest'
-
-    ## The following object is masked from 'package:dplyr':
-    ## 
-    ##     combine
-
-    ## The following object is masked from 'package:ggplot2':
-    ## 
-    ##     margin
-
-``` r
 # Produce random forest model
 newsPopFit_rf <- randomForest(shares ~ ., data = newsPop1Train, 
                               mtry = ncol(newsPop1Train)/3, 
@@ -572,18 +549,6 @@ shrinkage and depth parameters.
 
 ``` r
 library(caret)
-```
-
-    ## Loading required package: lattice
-
-    ## 
-    ## Attaching package: 'caret'
-
-    ## The following object is masked from 'package:purrr':
-    ## 
-    ##     lift
-
-``` r
 n.trees <- c(25,50,100,150,200)
 interaction.depth <- 1:4
 shrinkage <- 0.1
