@@ -188,7 +188,6 @@ g + labs(title = "Shares vs Words in Title") +
 
 We can inspect the trend of shares as a function of the number of words in the title. If the points show an upward trend, then articles with more words in the title tend to be shared more often. If we see a negative trend then articles with more words tend to be shared less often.
 
-
 Now let's look at the same plot but for the `n_unique_tokens` variable. We remove the extreme outlier first. 
 
 ```{r scatter2}
@@ -312,7 +311,6 @@ newsPopFit_boost <- train(shares ~ ., data = newsPop1Train,
                tuneGrid = X)
 ```
 
-
 Now we get the RMSE from each model and find the best one. The model with the highest predictive power will have the smallest RMSE.
 
 ```{r compare}
@@ -336,5 +334,3 @@ RMSE_mods
 
 paste("The", RMSE_mods[which(RMSE_mods==min(RMSE_mods))+1], "had the smallest RMSE of", RMSE_mods[which(RMSE_mods==min(RMSE_mods))])
 ```
-
-
